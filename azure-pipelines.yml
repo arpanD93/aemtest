@@ -1,0 +1,96 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+resources:
+ repositories:
+   - repository: helmrepo
+     type: github
+     name: utkarshpoc/azure-vote-helm-chart
+     endpoint: github
+
+variables:
+  acr.name: acrdemoutkarsh
+  acr.repo.name: helmdemo/vote-app
+  HELM_EXPERIMENTAL_OCI: 1
+
+stages:
+  - stage: ci
+    displayName: CI
+    jobs:
+      - job: helm_publish_acr
+        displayName: helm chart publish
+        steps:
+        - checkout: helmrepo
+          displayName: download chart
+
+        - script: |
+            ls $(build.sourcesdirectory)/src
+          displayName: list contents
+
+        - task: HelmInstaller@0
+          displayName: install helm
+          inputs:
+            helmVersion: 'latest'
+            installKubectl: false
+
+        - script: |
+            echo "$(acr.push.password)" | helm registry login $(acr.name).azurecr.io --username $(acr.push.username) --password-stdin
+          displayName: login to acr using helm
+        
+        - script: |
+            helm chart save $(build.sourcesdirectory)/src/azure-vote-helm-chart/ $(acr.name).azurecr.io/$(acr.repo.name):latest
+          displayName: save the chart and set the alias
+        
+        - script: |
+            helm chart push $(acr.name).azurecr.io/$(acr.repo.name):latest
+          displayName: push the chart to acr
+
+  - stage: cd
+    displayName: CD
+    dependsOn: ci
+    jobs:
+      - deployment: helm_publish_aks
+        displayName: deploy to aks
+        environment: 
+          name: PROD
+          resourceName: helmdemo
+          resourceType: Kubernetes
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+              - task: HelmInstaller@0
+                displayName: install helm
+                inputs:
+                  helmVersion: 'latest'
+                  installKubectl: false
+
+              - script: |
+                  echo "$(acr.pull.password)" | helm registry login $(acr.name).azurecr.io --username $(acr.pull.username) --password-stdin
+                displayName: login to acr using helm
+
+              - bash: |
+                    helm chart pull $(acr.name).azurecr.io/$(acr.repo.name):latest
+                displayName: get helm chart on agent
+              
+              - bash: |
+                  helm chart export $(acr.name).azurecr.io/$(acr.repo.name):latest --destination $(build.stagingdirectory)
+                displayName: export the chart to folder
+              
+              - task: HelmDeploy@0
+                displayName: deploy chart to aks
+                inputs:
+                  connectionType: 'Azure Resource Manager'
+                  azureSubscription: '$(azure.service.connection)'
+                  azureResourceGroup: 'demos'
+                  kubernetesCluster: 'aksdemoutkarsh'
+                  namespace: 'helmdemo'
+                  command: 'upgrade'
+                  chartType: 'FilePath'
+                  chartPath: '$(build.stagingdirectory)/azure-vote/'
+                  releaseName: 'helmdemo'
+                  arguments: '--create-namespace --install'
+
