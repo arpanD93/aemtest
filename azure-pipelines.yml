@@ -41,7 +41,8 @@ stages:
           displayName: login to acr using helm
         
         - script: |
-            helm chart save . $(build.sourcesdirectory)/src/azure-vote-helm-chart/ $(acr.name).azurecr.io/$(acr.repo.name):latest
+            #helm chart save $(build.sourcesdirectory)/src/azure-vote-helm-chart/ $(acr.name).azurecr.io/$(acr.repo.name):latest#
+            helm package .
             displayName: save the chart and set the alias
         
         - script: |
