@@ -42,7 +42,7 @@ stages:
         
         - script: |
             helm package .
-            displayName: save the chart and set the alias
+          displayName: save the chart and set the alias
         
         - script: |
             helm chart push $(acr.name).azurecr.io/$(acr.repo.name):latest
