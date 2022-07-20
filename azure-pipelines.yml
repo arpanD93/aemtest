@@ -9,10 +9,10 @@ resources:
    - repository: helmrepo
      type: github
      name: arpanD93/azure-vote-helm-chart
-     endpoint: github
+     endpoint: arpanD93
 
 variables:
-  acr.name: acrdemoutkarsh
+  acr.name: companyacr01
   acr.repo.name: helmdemo/vote-app
   HELM_EXPERIMENTAL_OCI: 1
 
