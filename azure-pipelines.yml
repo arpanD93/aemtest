@@ -54,10 +54,10 @@ stages:
     jobs:
       - deployment: helm_publish_aks
         displayName: deploy to aks
-        #environment: 
+        environment: 
           name: PROD
-          #resourceName: helmdemo
-          #resourceType: Kubernetes
+          resourceName: helmdemo
+          resourceType: Kubernetes
         strategy:
           runOnce:
             deploy:
