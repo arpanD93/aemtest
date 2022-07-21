@@ -41,12 +41,12 @@ stages:
           displayName: login to acr using helm
         
         - script: |
-            helm chart save . $(build.sourcesdirectory)/src/azure-vote-helm-chart/ $(acr.name).azurecr.io/$(acr.repo.name):latest
+            chartVersion=`helm chart save $(build.sourcesdirectory)/src/azure-vote-helm-chart/ $(acr.name).azurecr.io/$(acr.repo.name)`
 
           displayName: save the chart and set the alias
         
         - script: |
-            helm chart push $(acr.name).azurecr.io/$(acr.repo.name):latest
+            helm chart push $(acr.name).azurecr.io/$(acr.repo.name):$chartVersion
           displayName: push the chart to acr
 
   - stage: cd
