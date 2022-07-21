@@ -44,7 +44,7 @@ stages:
 
         - script: |
             helm chart save $(build.sourcesdirectory)/src/azure-vote-helm-chart/ $(acr.name).azurecr.io/$(acr.repo.name):latest
-            displayName: save the chart and set the alias
+          displayName: save the chart and set the alias
         
         - script: |
             helm chart push $(acr.name).azurecr.io/$(acr.repo.name)
