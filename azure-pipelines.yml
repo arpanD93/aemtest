@@ -13,7 +13,7 @@ resources:
 
 variables:
   acr.name: companyacr01
-  acr.repo.name: helmdemo/vote-app
+  acr.repo.name: helmdemo
   HELM_EXPERIMENTAL_OCI: 1
 
 stages:
@@ -43,7 +43,7 @@ stages:
 
 
         - script: |
-            helm chart save $(build.sourcesdirectory)/src/azure-vote-helm-chart/ $(acr.name).azurecr.io/$(acr.repo.name):latest
+            helm chart save $(build.sourcesdirectory)/src $(acr.name).azurecr.io/$(acr.repo.name):latest
           displayName: save the chart and set the alias
         
         - script: |
