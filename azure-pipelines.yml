@@ -40,10 +40,11 @@ stages:
             echo "$(acr.push.password)" | helm registry login $(acr.name).azurecr.io --username $(acr.push.username) --password-stdin
           displayName: login to acr using helm
         
-        - script: |
-            helm chart save azure-vote-helm-chart $(acr.name).azurecr.io/$(acr.repo.name)
 
-          displayName: save the chart and set the alias
+
+        - script: |
+            helm chart save $(build.sourcesdirectory)/src/azure-vote-helm-chart/ $(acr.name).azurecr.io/$(acr.repo.name):latest
+            displayName: save the chart and set the alias
         
         - script: |
             helm chart push $(acr.name).azurecr.io/$(acr.repo.name)
