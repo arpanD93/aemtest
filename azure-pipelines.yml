@@ -14,6 +14,9 @@ steps:
   displayName: 'Run a one-line script'
 
 - script: |
+    echo $(ORIGIN_URL)
+    echo $(REPO_NAME)
+    echo $(REPO1_URL)
     git clone --bare $(ORIGIN_URL)
     cd $(REPO_NAME)
     git remote add --mirror=fetch repo1 $(REPO1_URL)
