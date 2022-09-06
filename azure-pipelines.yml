@@ -1,0 +1,23 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- script: echo Hello, world!
+  displayName: 'Run a one-line script'
+
+- script: |
+    git clone --bare $(ORIGIN_URL)
+    cd $(REPO_NAME)
+    git remote add --mirror=fetch repo1 $(REPO1_URL)
+    git fetch origin --tags ; git fetch repo1 --tags
+    git push origin --all ; git push origin --tags
+    git push repo1 --all ; git push repo1 --tags
+  displayName: 'Run a multi-line script'
