@@ -1,0 +1,80 @@
+$details = @();
+
+$subscriptions = Read-Host "Enter the Subscription Name"
+
+foreach ($subscription in $subscriptions) {
+
+Set-AzContext -Subscription $subscription 
+
+$resourceGroups = Get-AzResourceGroup 
+
+foreach ($resourceGroup in $resourceGroups.ResourceGroupName) { 
+
+$storageAccounts = Get-AzStorageAccount -ResourceGroupName $resourceGroup
+
+foreach ($storageAccount in $storageAccounts) { 
+
+$Properties = Get-AzStorageBlobServiceProperty -ResourceGroupName $resourceGroup -StorageAccountName $storageAccount.StorageAccountName
+
+$changeFeedEnabled = $Properties.ChangeFeed.Enabled
+if ([string]::IsNullOrWhiteSpace($changeFeedEnabled)){$changeFeedEnabled = "Null"}
+
+$blobDeleteRetentionPolicy = $Properties.DeleteRetentionPolicy.Enabled
+if ([string]::IsNullOrWhiteSpace($blobDeleteRetentionPolicy)){$blobDeleteRetentionPolicy = "Null"}
+
+$blobDeleteRetentionPolicyDays = $Properties.DeleteRetentionPolicy.Days 
+if ([string]::IsNullOrWhiteSpace($blobDeleteRetentionPolicyDays)){$blobDeleteRetentionPolicyDays = "Null" }
+
+$ContainerDeleteRetentionPolicy = $Properties.ContainerDeleteRetentionPolicy.Enabled
+if ([string]::IsNullOrWhiteSpace($ContainerDeleteRetentionPolicy)){$ContainerDeleteRetentionPolicy = "Null"}
+
+$ContainerDeleteRetentionPolicyDays = $Properties.ContainerDeleteRetentionPolicy.Days
+if ([string]::IsNullOrWhiteSpace($ContainerDeleteRetentionPolicyDays)){$ContainerDeleteRetentionPolicyDays = "Null"}
+
+$versioning = $Properties.IsVersioningEnabled.Value
+if([string]::IsNullOrWhiteSpace($versioning)){$versioning = "Null"}
+
+$ChangeFeedRetentionInDays = $Properties.ChangeFeed.RetentionInDays
+if ([string]::IsNullOrWhiteSpace($ChangeFeedRetentionInDays)){$ChangeFeedRetentionInDays = "Null"}
+
+$tags = $storageAccount.Tags
+
+    $tagsKey = ($tags.Keys -join ";")
+    $tagsValue = ($tags.Values -join ";")
+
+if ($tags -eq $null){
+
+$details | Add-Member -MemberType NoteProperty -Name "Tags Key" -Value $tagsKey
+$details | Add-Member -MemberType NoteProperty -Name "Tags Values" -Value $tagsValue
+$details | Add-Member -MemberType NoteProperty -Name "Tags Present" -Value "Yes"
+
+}
+else {
+
+$details | Add-Member -MemberType NoteProperty -Name "Tags Present" -Value "No"
+}
+
+$details += [PSCustomObject]@{
+
+StorageAccountName = $storageAccount.StorageAccountName
+ResourceGroupName = $storageAccount.ResourceGroupName
+SubscriptionId = $subscription.Id
+Location = $storageAccount.Location
+Replication = $storageAccount.Sku.Name
+StorageKind = $storageAccount.Sku.Kind
+BlobPublicAccessEnabled = $storageAccount.AllowBlobPublicAccess
+ChangeFeedEnabled = $changeFeedEnabled
+ChangeFeedRetentioninDays = $ChangeFeedRetentionInDays
+VersioningEnabled = $versioning
+BlobSoftDelete = $blobDeleteRetentionPolicy
+BlobSoftDeleteInDays = $blobDeleteRetentionPolicyDays
+ContainerSoftDelete = $ContainerDeleteRetentionPolicy
+ContainerSoftDeleteInDays = $ContainerDeleteRetentionPolicyDays
+
+
+
+}
+}
+}
+}
+$details #| Export-Csv -Path " "
