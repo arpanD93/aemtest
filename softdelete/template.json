@@ -1,0 +1,154 @@
+
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccounts_mqtestblobstorage01_name": {
+            "defaultValue": "parameters('location')",
+            "type": "String"
+        },
+
+      "blobsn": {
+      "type": "string",
+      "defaultValue": "parameters('blobsn')",
+      "metadata": {
+        "description": "Name of the existing blobsn"
+      }
+      },
+
+      "fileServices": {
+      "type": "string",
+      "defaultValue": "parameters('fileServices')",
+      "metadata": {
+        "description": "Name of the existing fileServices"
+      }
+    }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2022-09-01",
+            "name": "[parameters('storageAccounts_mqtestblobstorage01_name')]",
+            "location": "centralus",
+            "tags": {
+                "Resource": "Storage",
+                "ApplicationServiceCI": "",
+                "CostCenter": "",
+                "DataClassification": "",
+                "Environment": "",
+                "Level1BusinessArea": "",
+                "PrimaryItContact": "",
+                "SystemCustodian": "",
+                "SystemOwner": "",
+                "TechnicalServiceOfferingCI": "",
+                "ms-resource-usage": "azure-cloud-shell"
+            },
+            "sku": {
+                "name": "Standard_GRS",
+                "tier": "Standard"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "publicNetworkAccess": "Enabled",
+                "allowCrossTenantReplication": false,
+                "minimumTlsVersion": "TLS1_2",
+                "allowBlobPublicAccess": false,
+                "allowSharedKeyAccess": true,
+                "isHnsEnabled": false,
+                "networkAcls": {
+                    "resourceAccessRules": [],
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [
+                        {
+                            "value": "40.248.248.16",
+                            "action": "Allow"
+                        },
+                        {
+                            "value": "40.248.248.15",
+                            "action": "Allow"
+                        },
+                        {
+                            "value": "40.248.248.12",
+                            "action": "Allow"
+                        },
+                        {
+                            "value": "40.250.230.230",
+                            "action": "Allow"
+                        }
+                    ],
+                    "defaultAction": "Deny"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2022-09-01",
+            "name": "[concat(parameters('storageAccounts_mqtestblobstorage01_name'), '/default')]",
+            
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_mqtestblobstorage01_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_GRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "containerDeleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": 7
+                },
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    
+                    "enabled": true,
+                    "days": 14
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2022-09-01",
+            "name": "[concat(parameters('storageAccounts_mqtestblobstorage01_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_mqtestblobstorage01_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_GRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "protocolSettings": {
+                    "smb": {}
+                },
+                "cors": {
+                    "corsRules": []
+                },
+                "shareDeleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": 14
+                }
+            }
+        }
+
+
+    ]
+}
