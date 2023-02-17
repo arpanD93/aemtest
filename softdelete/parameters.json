@@ -6,12 +6,7 @@
         "value": "mqtestblobstorage01"
       },
 
-      "blobsn": {
-        "value": "testcontainer"
-      },
-      "fileServices": {
-        "value": "testbackup"
-      }
+  
 
     }
   }
