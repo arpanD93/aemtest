@@ -1,0 +1,61 @@
+######################blob buil##############
+
+pool:
+  name: POOLNAME
+steps:
+- task: AzureResourceManagerTemplateDeployment@3
+  displayName: 'ARM Template deployment: Validation'
+  inputs:
+    azureResourceManagerConnection: 'SERVICE CONNECTION'
+    subscriptionId: 'ID'
+    resourceGroupName: 'RG'
+    location: 'Central US'
+    csmFile: deploy.json
+    csmParametersFile: 'Modules/XXXXXXXX/_parameters_dev.json'
+    deploymentMode: Validation
+
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish Pipeline Artifact'
+  inputs:
+    targetPath: Modules/ARM/Blob
+    artifact: 'complaintsanalytics_BlobArtifacts'
+
+#########################resource group deployment##############
+steps:
+- task: AzureResourceManagerTemplateDeployment@3
+  displayName: ResourceGroupDeployment
+  inputs:
+    deploymentScope: Subscription
+    azureResourceManagerConnection: 'GLB-DEV-DX-MQ-COMPLAINTSANALYTICS-SUB01'
+    subscriptionId: 'c7631e66-d8f5-40d7-a9ec-646ecc01dba5'
+    location: 'Central US'
+    csmFile: '$(System.DefaultWorkingDirectory)/_complaintsanalytics_ResourceGroup_Build/complaintsanalytics_ResourceGroupArtifacts/deploy.json'
+    csmParametersFile: '$(System.DefaultWorkingDirectory)/_complaintsanalytics_ResourceGroup_Build/complaintsanalytics_ResourceGroupArtifacts/Parameters/Dev/blob_parameters.json'
+    deploymentOutputs: armOutputVar
+
+#Your build pipeline references an undefined variable named ‘$outputsObject.resourceGroupName.value’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+#Your build pipeline references an undefined variable named ‘$outputsObject.resourceGroupName.value’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
+steps:
+- pwsh: |
+   # Write your PowerShell commands here.
+   
+   
+   $outputsObject = $env:armOutputVar | ConvertFrom-Json
+   Write-host "Output: $($outputsObject.resourceGroupName.value)"
+   Write-Host "##vso[task.setvariable variable=resourceGroupName]$($outputsObject.resourceGroupName.value)"
+  displayName: 'ReadArmOutputVar_RGName'
+
+
+#Your build pipeline references an undefined variable named ‘resourceGroupName’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
+steps:
+- task: AzureResourceManagerTemplateDeployment@3
+  displayName: 'BlobDeployment'
+  inputs:
+    azureResourceManagerConnection: 'service connection'
+    subscriptionId: 'ID'
+    resourceGroupName: '$(resourceGroupName)'
+    location: 'Central US'
+    csmFile: '$(System.DefaultWorkingDirectory)/XXXXXXX/deploy.json'
+    csmParametersFile: '$(System.DefaultWorkingDirectory)/_complaintsanalytics_Blob_Build/parameters_dev.json'
