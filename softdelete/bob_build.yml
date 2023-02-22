@@ -26,11 +26,11 @@ steps:
   displayName: ResourceGroupDeployment
   inputs:
     deploymentScope: Subscription
-    azureResourceManagerConnection: 'GLB-DEV-DX-MQ-COMPLAINTSANALYTICS-SUB01'
-    subscriptionId: 'c7631e66-d8f5-40d7-a9ec-646ecc01dba5'
+    azureResourceManagerConnection: 'Service connection'
+    subscriptionId: 'c763789gh66XXXXXX'
     location: 'Central US'
-    csmFile: '$(System.DefaultWorkingDirectory)/_complaintsanalytics_ResourceGroup_Build/complaintsanalytics_ResourceGroupArtifacts/deploy.json'
-    csmParametersFile: '$(System.DefaultWorkingDirectory)/_complaintsanalytics_ResourceGroup_Build/complaintsanalytics_ResourceGroupArtifacts/Parameters/Dev/blob_parameters.json'
+    csmFile: '$(System.DefaultWorkingDirectory)/_xxxxxxxxxxxxxxxxxx/deploy.json'
+    csmParametersFile: '$(System.DefaultWorkingDirectory)/xxxxxxxxxxxxxxxxxxxxxxxxx/blob_parameters.json'
     deploymentOutputs: armOutputVar
 
 #Your build pipeline references an undefined variable named ‘$outputsObject.resourceGroupName.value’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
@@ -58,4 +58,4 @@ steps:
     resourceGroupName: '$(resourceGroupName)'
     location: 'Central US'
     csmFile: '$(System.DefaultWorkingDirectory)/XXXXXXX/deploy.json'
-    csmParametersFile: '$(System.DefaultWorkingDirectory)/_complaintsanalytics_Blob_Build/parameters_dev.json'
+    csmParametersFile: '$(System.DefaultWorkingDirectory)/xxxxxxxxxxx/parameters_dev.json'
